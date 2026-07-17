@@ -2,6 +2,13 @@
 param([int]$Port = 9335)
 
 $ErrorActionPreference = 'Stop'
-$arguments = @{ PromptRestart = $true }
+. (Join-Path $PSScriptRoot 'common-endfield.ps1')
+
+$null = Set-EndfieldNodeEnvironment
+$engine = Assert-EndfieldInstalledEngine
+$arguments = @{
+  PromptRestart = $true
+  ProfilePath = (Get-EndfieldProfilePath)
+}
 if ($PSBoundParameters.ContainsKey('Port')) { $arguments.Port = $Port }
-& (Join-Path $PSScriptRoot 'start-dream-skin.ps1') @arguments
+& $engine.Start @arguments

@@ -280,11 +280,6 @@ const THEME_CHOICES = {
   safeArea: new Set(["auto", "left", "right", "center", "none"]),
   taskMode: new Set(["auto", "ambient", "banner", "off"]),
 };
-const THEME_COLOR_KEYS = [
-  "background", "panel", "panelAlt", "accent", "accentAlt",
-  "secondary", "highlight", "text", "muted", "line",
-];
-const THEME_COLOR_PATTERN = /^(?:#[\da-f]{6}|rgba?\([\d\s.,%/+-]+\))$/i;
 
 function normalizedUnit(value, name) {
   if (value === null || value === undefined || value === "") return null;
@@ -336,27 +331,9 @@ async function loadTheme(themeDir) {
   const art = raw.art && typeof raw.art === "object" && !Array.isArray(raw.art) ? raw.art : {};
   const palette = raw.palette && typeof raw.palette === "object" && !Array.isArray(raw.palette)
     ? raw.palette : {};
-  const rawColors = raw.colors && typeof raw.colors === "object" && !Array.isArray(raw.colors)
-    ? raw.colors : {};
-  const colors = {};
-  const explicitColorKeys = [];
-  for (const key of THEME_COLOR_KEYS) {
-    if (rawColors[key] === undefined || rawColors[key] === null || rawColors[key] === "") continue;
-    if (typeof rawColors[key] !== "string" || !THEME_COLOR_PATTERN.test(rawColors[key].trim())) {
-      throw new Error(`colors.${key} is not a supported CSS color`);
-    }
-    colors[key] = rawColors[key].trim();
-    explicitColorKeys.push(key);
-  }
   const theme = {
     id: normalizedText(raw.id, "id", "custom", 80),
     name: normalizedText(raw.name, "name", "Codex Dream Skin", 120),
-    brandSubtitle: normalizedText(raw.brandSubtitle, "brandSubtitle", "CODEX DREAM SKIN", 120),
-    tagline: normalizedText(raw.tagline, "tagline", "Make something wonderful.", 160),
-    projectPrefix: normalizedText(raw.projectPrefix, "projectPrefix", "选择项目 · ", 80),
-    projectLabel: normalizedText(raw.projectLabel, "projectLabel", "◉  选择项目", 120),
-    statusText: normalizedText(raw.statusText, "statusText", "DREAM SKIN ONLINE", 120),
-    quote: normalizedText(raw.quote, "quote", "MAKE SOMETHING WONDERFUL", 120),
     image,
     appearance: normalizedChoice(raw.appearance, "appearance", THEME_CHOICES.appearance, "auto"),
     art: {
@@ -366,8 +343,6 @@ async function loadTheme(themeDir) {
       taskMode: normalizedChoice(art.taskMode, "art.taskMode", THEME_CHOICES.taskMode, "auto"),
     },
     palette: {},
-    colors,
-    explicitColorKeys,
   };
   if (typeof palette.accent === "string" && palette.accent.trim()) {
     const accent = palette.accent.trim();
@@ -391,7 +366,6 @@ async function loadTheme(themeDir) {
     throw new Error("Theme image metadata is invalid or exceeds the 16384px / 50MP safety limit");
   }
   theme.artMetadata = artMetadata;
-  theme.artKey = createHash("sha256").update(imageBytes).digest("hex").slice(0, 20);
   const fingerprint = createHash("sha256")
     .update(themeText, "utf8")
     .update("\0")
@@ -417,13 +391,10 @@ async function loadPayload(themeDir = path.join(root, "assets"), candidateTheme 
   const mime = extension === ".jpg" || extension === ".jpeg" ? "image/jpeg"
     : extension === ".webp" ? "image/webp" : "image/png";
   const artDataUrl = `data:${mime};base64,${loadedTheme.imageBytes.toString("base64")}`;
-  const styleRevision = createHash("sha256").update(css).digest("hex").slice(0, 20);
   const payload = template
-    .replace("__DREAM_SKIN_CSS_JSON__", JSON.stringify(css))
-    .replace("__DREAM_SKIN_ART_JSON__", JSON.stringify(artDataUrl))
-    .replace("__DREAM_SKIN_THEME_JSON__", JSON.stringify(loadedTheme.theme))
-    .replace("__DREAM_SKIN_VERSION_JSON__", JSON.stringify(SKIN_VERSION))
-    .replace("__DREAM_SKIN_STYLE_REVISION_JSON__", JSON.stringify(styleRevision));
+    .replace("__DREAM_CSS_JSON__", JSON.stringify(css))
+    .replace("__DREAM_ART_JSON__", JSON.stringify(artDataUrl))
+    .replace("__DREAM_THEME_JSON__", JSON.stringify(loadedTheme.theme));
   const { imageBytes: _imageBytes, ...themeState } = loadedTheme;
   return { ...themeState, payload };
 }
@@ -566,8 +537,20 @@ async function removeFromSession(session) {
     window.__CODEX_DREAM_SKIN_DISABLED__ = true;
     const state = window.__CODEX_DREAM_SKIN_STATE__;
     if (state?.cleanup) return state.cleanup();
-    document.documentElement?.classList.remove('codex-dream-skin');
-    document.documentElement?.style.removeProperty('--dream-skin-art');
+    document.documentElement?.classList.remove(
+      'codex-dream-skin', 'dream-theme-light', 'dream-theme-dark',
+      'dream-art-wide', 'dream-art-standard', 'dream-focus-left',
+      'dream-focus-center', 'dream-focus-right', 'dream-safe-left',
+      'dream-safe-center', 'dream-safe-right', 'dream-safe-none',
+      'dream-task-ambient', 'dream-task-banner', 'dream-task-off'
+    );
+    for (const property of [
+      '--dream-art', '--dream-art-position', '--dream-focus-x', '--dream-focus-y',
+      '--dream-accent', '--dream-accent-ink', '--dream-image-luma'
+    ]) document.documentElement?.style.removeProperty(property);
+    document.querySelectorAll('.dream-home').forEach((node) => node.classList.remove('dream-home'));
+    document.querySelectorAll('.dream-task').forEach((node) => node.classList.remove('dream-task'));
+    document.querySelectorAll('.dream-home-shell').forEach((node) => node.classList.remove('dream-home-shell'));
     document.getElementById('codex-dream-skin-style')?.remove();
     document.getElementById('codex-dream-skin-chrome')?.remove();
     delete window.__CODEX_DREAM_SKIN_STATE__;
@@ -578,6 +561,10 @@ async function removeFromSession(session) {
 async function verifyRemovedSession(session) {
   return session.evaluate(`(() =>
     !document.documentElement.classList.contains('codex-dream-skin') &&
+    !document.documentElement.style.getPropertyValue('--dream-art') &&
+    !document.querySelector('.dream-home') &&
+    !document.querySelector('.dream-task') &&
+    !document.querySelector('.dream-home-shell') &&
     !document.getElementById('codex-dream-skin-style') &&
     !document.getElementById('codex-dream-skin-chrome') &&
     !window.__CODEX_DREAM_SKIN_STATE__
@@ -589,60 +576,35 @@ async function verifySession(session) {
     const box = (node) => {
       if (!node) return null;
       const r = node.getBoundingClientRect();
-      const style = getComputedStyle(node);
-      return {
-        x: Math.round(r.x), y: Math.round(r.y),
-        width: Math.round(r.width), height: Math.round(r.height),
-        visible: r.width > 0 && r.height > 0 && style.display !== 'none' && style.visibility !== 'hidden',
-      };
+      return { x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height) };
     };
-    const homeIndicator = document.querySelector('[data-testid="home-icon"]');
-    const homeSignal = homeIndicator ?? document.querySelector('[data-feature="game-source"]') ??
-      document.querySelector('.group\\\\/home-suggestions');
-    const homeRoute = homeSignal?.closest('[role="main"]') ?? null;
-    const home = document.querySelector('[role="main"].dream-skin-home');
+    const home = document.querySelector('.dream-home');
     const suggestions = home?.querySelector('.group\\\\/home-suggestions') ?? null;
-    const cardBoxes = suggestions ? [...suggestions.querySelectorAll('button')].map(box) : [];
-    const visibleCards = cardBoxes.filter((item) => item?.visible);
-    const hero = box(home?.firstElementChild?.firstElementChild?.firstElementChild);
-    const projectButton = box(home?.querySelector('.group\\\\/project-selector > button'));
-    const shell = box(document.querySelector('main.main-surface'));
-    const composer = box(document.querySelector('.composer-surface-chrome'));
-    const sidebar = box(document.querySelector('aside.app-shell-left-panel'));
-    const chrome = document.getElementById('codex-dream-skin-chrome');
+    const cards = suggestions ? [...suggestions.querySelectorAll('button')].map(box) : [];
     const result = {
       installed: document.documentElement.classList.contains('codex-dream-skin'),
       version: window.__CODEX_DREAM_SKIN_STATE__?.version ?? null,
+      expectedVersion: ${JSON.stringify(SKIN_VERSION)},
       stylePresent: Boolean(document.getElementById('codex-dream-skin-style')),
-      chromePresent: Boolean(chrome),
-      chromePointerEvents: getComputedStyle(chrome || document.body).pointerEvents,
-      homeRoute: Boolean(homeRoute),
+      chromePresent: Boolean(document.getElementById('codex-dream-skin-chrome')),
+      chromePointerEvents: getComputedStyle(document.getElementById('codex-dream-skin-chrome') || document.body).pointerEvents,
       homePresent: Boolean(home),
-      hero,
-      cards: cardBoxes,
-      visibleCardCount: visibleCards.length,
-      projectButton,
-      shell,
-      composer,
-      sidebar,
+      suggestionsPresent: Boolean(suggestions),
+      hero: box(home?.firstElementChild?.firstElementChild?.firstElementChild),
+      cards,
+      composer: box(document.querySelector('.composer-surface-chrome')),
+      sidebar: box(document.querySelector('aside.app-shell-left-panel')),
       viewport: { width: innerWidth, height: innerHeight },
       documentOverflow: {
         x: document.documentElement.scrollWidth > document.documentElement.clientWidth,
         y: document.documentElement.scrollHeight > document.documentElement.clientHeight,
       },
     };
-    const basePass = result.installed && result.version === ${JSON.stringify(SKIN_VERSION)} &&
-      result.stylePresent && result.chromePresent && result.chromePointerEvents === 'none' &&
-      Boolean(result.shell?.visible) && Boolean(result.sidebar?.visible) && !result.documentOverflow.x;
-    const homePass = !result.homeRoute || (
-      result.homePresent && result.hero?.visible && result.hero.width >= 280 && result.hero.height >= 120
-    );
-    result.pass = Boolean(basePass && homePass);
-    result.softNotes = {
-      projectButtonOptional: !result.projectButton?.visible,
-      composerOptionalOnNonTaskRoutes: !result.composer?.visible,
-      suggestionCardsOptional: result.homeRoute && result.visibleCardCount === 0,
-    };
+    result.pass = result.installed && result.version === result.expectedVersion &&
+      result.stylePresent && result.chromePresent &&
+      result.chromePointerEvents === 'none' && Boolean(result.composer) && Boolean(result.sidebar) &&
+      (!result.homePresent || (Boolean(result.hero) &&
+        (!result.suggestionsPresent || (result.cards.length >= 2 && result.cards.length <= 4))));
     return result;
   })()`);
 }
@@ -1012,10 +974,7 @@ if (path.resolve(process.argv[1] || "") === path.resolve(scriptPath)) {
   console.log(JSON.stringify({ pass: true, version: SKIN_VERSION, test: "loopback-cdp-validation" }));
   } else if (options.mode === "check-payload") {
     const loaded = await loadPayload(options.themeDir);
-    const unresolved = [
-      "__DREAM_SKIN_CSS_JSON__", "__DREAM_SKIN_ART_JSON__", "__DREAM_SKIN_THEME_JSON__",
-      "__DREAM_SKIN_VERSION_JSON__", "__DREAM_SKIN_STYLE_REVISION_JSON__",
-    ]
+    const unresolved = ["__DREAM_CSS_JSON__", "__DREAM_ART_JSON__", "__DREAM_THEME_JSON__"]
       .some((placeholder) => loaded.payload.includes(placeholder));
     if (unresolved) {
       throw new Error("Payload placeholders were not fully replaced");

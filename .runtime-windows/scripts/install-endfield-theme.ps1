@@ -3,25 +3,24 @@ param([int]$Port = 9335)
 
 $ErrorActionPreference = 'Stop'
 $portExplicit = $PSBoundParameters.ContainsKey('Port')
-$root = Split-Path -Parent $PSScriptRoot
-$install = Join-Path $PSScriptRoot 'install-dream-skin.ps1'
-$start = Join-Path $PSScriptRoot 'start-dream-skin.ps1'
+. (Join-Path $PSScriptRoot 'common-endfield.ps1')
 
-$installArguments = @{ NoShortcuts = $true }
-if ($portExplicit) { $installArguments.Port = $Port }
-& $install @installArguments
+$node = Set-EndfieldNodeEnvironment
+Write-Host "[Codex Hypergryph Theme] Using Node.js $($node.Version) from $($node.Path)"
+$stage = New-EndfieldRuntimeStage
+try {
+  $installArguments = @{ NoShortcuts = $true }
+  if ($portExplicit) { $installArguments.Port = $Port }
+  & $stage.Install @installArguments
 
-. (Join-Path $PSScriptRoot 'common-windows.ps1')
-. (Join-Path $PSScriptRoot 'theme-windows.ps1')
-$stateRoot = Join-Path $env:LOCALAPPDATA 'CodexDreamSkin'
-$themePath = Join-Path $root 'assets\theme.json'
-$imagePath = Join-Path $root 'assets\dream-reference.jpg'
-$theme = (Read-DreamSkinUtf8File -Path $themePath) | ConvertFrom-Json -ErrorAction Stop
-$active = Set-DreamSkinActiveTheme -ImagePath $imagePath -Theme $theme -StateRoot $stateRoot
-if ("$($active.Theme.id)" -cne 'preset-endfield-frontier') {
-  throw 'The Endfield theme could not be activated.'
+  $engine = Assert-EndfieldInstalledEngine
+  $null = Set-EndfieldActiveTheme -Engine $engine
+  $startArguments = @{
+    PromptRestart = $true
+    ProfilePath = (Get-EndfieldProfilePath)
+  }
+  if ($portExplicit) { $startArguments.Port = $Port }
+  & $engine.Start @startArguments
+} finally {
+  Remove-EndfieldRuntimeStage -Path $stage.Root
 }
-
-$startArguments = @{ PromptRestart = $true }
-if ($portExplicit) { $startArguments.Port = $Port }
-& $start @startArguments

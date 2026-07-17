@@ -9,9 +9,36 @@
     "data-dream-art-safe-area", "data-dream-art-task-mode", "data-dream-art-aspect",
     "data-dream-art-ready",
   ];
-  const VERSION = __DREAM_SKIN_VERSION_JSON__;
-  const STYLE_REVISION = __DREAM_SKIN_STYLE_REVISION_JSON__;
+  const VERSION = "1.2.0";
+  const STYLE_REVISION = (() => {
+    let hash = 2166136261;
+    for (let index = 0; index < cssText.length; index += 1) {
+      hash ^= cssText.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `${cssText.length}-${(hash >>> 0).toString(16)}`;
+  })();
   const THEME = themeConfig && typeof themeConfig === "object" ? themeConfig : {};
+  const ENDFIELD_COPY = {
+    brandSubtitle: "ENDFIELD // FRONTIER PROTOCOL 01",
+    tagline: "边境部署已就绪。开始今日的工程行动。",
+    projectPrefix: "工作区 · ",
+    projectLabel: "ENDFIELD // 选择工作区",
+    statusText: "INDUSTRIAL DEPLOYMENT // READY",
+    quote: "BUILD THE FRONTIER // 01",
+  };
+  const ENDFIELD_COLORS = {
+    background: "#0B0D0E",
+    panel: "#15191C",
+    panelAlt: "#20262A",
+    accent: "#F3C548",
+    accentAlt: "#FFE07A",
+    secondary: "#79D4D2",
+    highlight: "#E05245",
+    text: "#F2F0E8",
+    muted: "#9CA2A2",
+    line: "rgba(243, 197, 72, .28)",
+  };
   const ART = THEME.art && typeof THEME.art === "object" ? THEME.art : {};
   const ART_METADATA = THEME.artMetadata && typeof THEME.artMetadata === "object"
     ? THEME.artMetadata : null;
@@ -298,28 +325,19 @@
   };
 
   const applyTheme = (root, shell) => {
-    const colors = THEME.colors || {};
-    const explicit = new Set(Array.isArray(THEME.explicitColorKeys) ? THEME.explicitColorKeys : []);
-    const adaptive = makeAdaptivePalette(artAnalysis?.accentRgb, shell);
-    const legacyLight = !THEME.appearance && shell === "light";
-    const structural = new Set(["background", "panel", "panelAlt", "text", "muted"]);
-    const pick = (name) => {
-      const allowExplicit = explicit.has(name) && !(legacyLight && structural.has(name));
-      return allowExplicit && typeof colors[name] === "string" ? colors[name] : adaptive[name];
-    };
-    const accent = pick("accent");
-    const accentAlt = explicit.has("accentAlt") ? pick("accentAlt") : (explicit.has("accent") ? accent : adaptive.accentAlt);
+    const configuredAccent = THEME.palette && typeof THEME.palette.accent === "string"
+      ? THEME.palette.accent : ENDFIELD_COLORS.accent;
     const variables = {
-      "--ds-bg": pick("background"),
-      "--ds-panel": pick("panel"),
-      "--ds-panel-2": pick("panelAlt"),
-      "--ds-green": accent,
-      "--ds-lime": accentAlt,
-      "--ds-cyan": pick("secondary"),
-      "--ds-purple": pick("highlight"),
-      "--ds-text": pick("text"),
-      "--ds-muted": pick("muted"),
-      "--ds-line": explicit.has("line") && typeof colors.line === "string" ? colors.line : adaptive.line,
+      "--ds-bg": ENDFIELD_COLORS.background,
+      "--ds-panel": ENDFIELD_COLORS.panel,
+      "--ds-panel-2": ENDFIELD_COLORS.panelAlt,
+      "--ds-green": configuredAccent,
+      "--ds-lime": ENDFIELD_COLORS.accentAlt,
+      "--ds-cyan": ENDFIELD_COLORS.secondary,
+      "--ds-purple": ENDFIELD_COLORS.highlight,
+      "--ds-text": ENDFIELD_COLORS.text,
+      "--ds-muted": ENDFIELD_COLORS.muted,
+      "--ds-line": ENDFIELD_COLORS.line,
     };
 
     for (const [name, value] of Object.entries(variables)) {
@@ -342,10 +360,10 @@
       if (rgb) setStyleProperty(root, name, rgb);
     }
     setStyleProperty(root, "--dream-skin-name", cssString(THEME.name || "Codex Dream Skin"));
-    setStyleProperty(root, "--dream-skin-brand-subtitle", cssString(THEME.brandSubtitle || "CODEX DREAM SKIN"));
-    setStyleProperty(root, "--dream-skin-tagline", cssString(THEME.tagline || "Make something wonderful."));
-    setStyleProperty(root, "--dream-skin-project-prefix", cssString(THEME.projectPrefix || "选择项目 · "));
-    setStyleProperty(root, "--dream-skin-project-label", cssString(THEME.projectLabel || "◉  选择项目"));
+    setStyleProperty(root, "--dream-skin-brand-subtitle", cssString(ENDFIELD_COPY.brandSubtitle));
+    setStyleProperty(root, "--dream-skin-tagline", cssString(ENDFIELD_COPY.tagline));
+    setStyleProperty(root, "--dream-skin-project-prefix", cssString(ENDFIELD_COPY.projectPrefix));
+    setStyleProperty(root, "--dream-skin-project-label", cssString(ENDFIELD_COPY.projectLabel));
   };
 
   const applyArtMetadata = (root) => {
@@ -617,9 +635,9 @@
       };
     }
     setTextContent(chromeParts.name, THEME.name || "Codex Dream Skin");
-    setTextContent(chromeParts.subtitle, THEME.brandSubtitle || "CODEX DREAM SKIN");
-    setTextContent(chromeParts.status, THEME.statusText || "DREAM SKIN ONLINE");
-    setTextContent(chromeParts.quote, THEME.quote || "MAKE SOMETHING WONDERFUL");
+    setTextContent(chromeParts.subtitle, ENDFIELD_COPY.brandSubtitle);
+    setTextContent(chromeParts.status, ENDFIELD_COPY.statusText);
+    setTextContent(chromeParts.quote, ENDFIELD_COPY.quote);
     if (layout || created) {
       metrics.layoutReads += 1;
       const shellBox = shellMain.getBoundingClientRect();
@@ -784,4 +802,4 @@
     shell: resolvedShell(),
     analysis: artAnalysis,
   };
-})(__DREAM_SKIN_CSS_JSON__, __DREAM_SKIN_ART_JSON__, __DREAM_SKIN_THEME_JSON__)
+})(__DREAM_CSS_JSON__, __DREAM_ART_JSON__, __DREAM_THEME_JSON__)

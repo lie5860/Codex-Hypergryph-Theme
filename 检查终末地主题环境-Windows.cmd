@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-set "SCRIPT=%~dp0.runtime-windows\scripts\install-endfield-theme.ps1"
+set "SCRIPT=%~dp0.runtime-windows\scripts\doctor-endfield-theme.ps1"
 if not exist "%SCRIPT%" (
   echo [ERROR] Runtime script is missing: "%SCRIPT%"
   echo Please extract the complete release before running this file.
@@ -13,13 +13,15 @@ if errorlevel 1 (
   pause
   exit /b 3
 )
-echo [Codex Hypergryph Theme] Installing and starting the Windows theme...
+echo [Codex Hypergryph Theme] Running a read-only Windows environment check...
+echo.
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%"
 set "CODE=%ERRORLEVEL%"
-if not "%CODE%"=="0" (
-  echo.
-  echo [ERROR] Installation failed with exit code %CODE%.
-  echo Run the Windows environment checker in this folder for details.
-  pause
+echo.
+if "%CODE%"=="0" (
+  echo [OK] All Windows environment checks passed.
+) else (
+  echo [ERROR] Environment check failed with exit code %CODE%.
 )
+pause
 exit /b %CODE%

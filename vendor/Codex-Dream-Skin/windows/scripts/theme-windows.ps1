@@ -1,4 +1,4 @@
-if (-not (Get-Command Read-DreamSkinUtf8File -ErrorAction SilentlyContinue)) {
+﻿if (-not (Get-Command Read-DreamSkinUtf8File -ErrorAction SilentlyContinue)) {
   . (Join-Path $PSScriptRoot 'config-utf8.ps1')
 }
 
@@ -214,7 +214,7 @@ function Initialize-DreamSkinThemeStore {
     Assert-DreamSkinNoReparseComponents -Path $activeTheme
     Copy-Item -LiteralPath (Join-Path $assetRoot 'theme.json') -Destination $activeTheme -Force
   }
-  $presetDirectory = Join-Path $paths.Saved 'preset-endfield-frontier'
+  $presetDirectory = Join-Path $paths.Saved 'preset-romantic-rose'
   $presetTheme = Join-Path $presetDirectory 'theme.json'
   Assert-DreamSkinNoReparseComponents -Path $presetDirectory
   Assert-DreamSkinNoReparseComponents -Path $presetTheme
