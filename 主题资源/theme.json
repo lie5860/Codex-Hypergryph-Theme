@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "preset-endfield-frontier",
+  "name": "终末地 · 边境工业",
+  "brandSubtitle": "ENDFIELD // FRONTIER PROTOCOL 01",
+  "tagline": "边境部署已就绪。开始今日的工程行动。",
+  "projectPrefix": "工作区 · ",
+  "projectLabel": "ENDFIELD // 选择工作区",
+  "statusText": "INDUSTRIAL DEPLOYMENT // READY",
+  "quote": "BUILD THE FRONTIER // 01",
+  "image": "background.jpg",
+  "appearance": "dark",
+  "art": {
+    "focusX": 0.74,
+    "focusY": 0.44,
+    "safeArea": "left",
+    "taskMode": "ambient"
+  },
+  "colors": {
+    "background": "#0B0D0E",
+    "panel": "#15191C",
+    "panelAlt": "#20262A",
+    "accent": "#F3C548",
+    "accentAlt": "#FFE07A",
+    "secondary": "#79D4D2",
+    "highlight": "#E05245",
+    "text": "#F2F0E8",
+    "muted": "#9CA2A2",
+    "line": "rgba(243, 197, 72, .28)"
+  }
+}
