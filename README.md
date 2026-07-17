@@ -22,6 +22,8 @@
 
 如果启动失败，双击 `检查终末地主题环境-Windows.cmd` 可执行只读检查，验证 PowerShell、Node.js、Codex Store 安装、主题资源与注入器。Windows 版会使用 `%LOCALAPPDATA%\CodexDreamSkin\codex-profile` 作为持久化主题配置目录，以兼容 Chromium 136 之后的远程调试安全限制；官方 Codex 配置目录不会被改作调试配置，首次进入主题配置时可能需要重新登录。
 
+主题运行期间会保留一个可见的终端窗口，用于承载持续注入进程。请勿直接关闭该窗口；需要结束主题时应双击 `停用主题并恢复官方外观-Windows.cmd`。原因、企业环境使用方式与无窗口模式边界见 [`docs/windows-terminal-window.md`](./docs/windows-terminal-window.md)。
+
 以后重新启用或停用主题，双击同目录中对应的“启动”或“停用主题并恢复官方外观”文件即可。
 
 ## 特性
@@ -41,7 +43,7 @@ Windows 版直接依赖 [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/
 - `.runtime-windows/assets` 只保存终末地 CSS、renderer、配置与原创背景
 - `.runtime-windows/scripts` 只负责 Node.js 探测、临时组装资源包和调用上游入口
 
-安装时会临时组装“固定上游引擎 + 终末地资源”，再由上游安装事务复制到 `%LOCALAPPDATA%\CodexDreamSkin\engine`。发布包不依赖 Git，也不需要在安装时联网。出于企业终端安全要求，vendored 上游移除了 3 处隐藏窗口启动参数；完整差异见 [`vendor/Codex-Dream-Skin/PATCHES.md`](./vendor/Codex-Dream-Skin/PATCHES.md)。维护与升级说明见 [`docs/windows-architecture.md`](./docs/windows-architecture.md)。
+安装时会临时组装“固定上游引擎 + 终末地资源”，再由上游安装事务复制到 `%LOCALAPPDATA%\CodexDreamSkin\engine`。发布包不依赖 Git，也不需要在安装时联网。出于企业终端安全要求，vendored 上游移除了 3 处隐藏窗口启动参数；完整差异见 [`vendor/Codex-Dream-Skin/PATCHES.md`](./vendor/Codex-Dream-Skin/PATCHES.md)。维护与升级说明见 [`docs/windows-architecture.md`](./docs/windows-architecture.md)，终端窗口说明见 [`docs/windows-terminal-window.md`](./docs/windows-terminal-window.md)。
 
 <details>
 <summary>最小窗口预览</summary>
