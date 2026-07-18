@@ -1,15 +1,48 @@
-Codex Hypergryph Theme v1.0（macOS / Windows）
+Codex Hypergryph Theme v1.0
 
-macOS：完全退出 Codex，双击“安装终末地主题-macOS.command”。
-Windows：安装 Node.js 22 或更高版本，完全退出 Codex，双击“安装终末地主题-Windows.cmd”。脚本可自动识别 PATH、fnm、nvm-windows、Volta 与常见安装目录中的 Node.js。
-Windows 启动失败时：双击“检查终末地主题环境-Windows.cmd”执行只读检查。
+本仓库只提供主题资源，不提供安装、启动、恢复或注入脚本。
 
-以后重新启用：双击同系统的“启动终末地主题”。
-不再使用主题：双击同系统的“停用主题并恢复官方外观”。
+使用方式：
+1. 按主仓库 Fei-Away/Codex-Dream-Skin 的说明安装并运行。
+2. 将“主题资源”目录作为一个 saved theme/preset 目录使用；目录内只需要 theme.json 与 background.jpg。
+   macOS：~/Library/Application Support/CodexDreamSkinStudio/themes/preset-endfield-frontier/
+   Windows：%LOCALAPPDATA%\CodexDreamSkin\themes\preset-endfield-frontier\
+3. 后续启动、切换、验证、恢复都使用主仓库自带命令或菜单。
 
-安装不会在桌面或 Windows 开始菜单创建文件。请保留这个解压目录。
-Windows 发布包已内置固定版本的 Codex Dream Skin 上游引擎，安装时不需要 Git 或网络下载；本项目只覆盖终末地主题资源与配置。
-Windows 会在 %LOCALAPPDATA%\CodexDreamSkin\codex-profile 保存独立的主题会话配置，以兼容新版 Chromium；首次进入时可能需要重新登录，官方 Codex 配置不会被覆盖。
-“恢复官方外观”只停止主题注入、关闭本机调试会话并恢复安装前的外观设置；不会删除任务、账号、插件、项目或 Codex。
+主题资源：
+- 主题资源/background.jpg
+- 主题资源/theme.json
+
+说明：本主题资源不新增、不隐藏 Codex 新建任务页的原生建议按钮。新版 Codex 或不同账号状态下可能不显示 suggestion cards；这种情况下主题只会渲染背景、标题区域和输入框外观。
+
+复制即用（macOS，在本仓库根目录运行）：
+THEME_SOURCE="$(pwd)/主题资源"
+UPSTREAM="$HOME/Codex-Dream-Skin"
+if [ -d "$UPSTREAM/.git" ]; then git -C "$UPSTREAM" pull --ff-only; else git clone https://github.com/Fei-Away/Codex-Dream-Skin.git "$UPSTREAM"; fi
+cd "$UPSTREAM/macos"
+./scripts/install-dream-skin-macos.sh --no-launch
+THEME_ID="preset-endfield-frontier"
+THEME_DEST="$HOME/Library/Application Support/CodexDreamSkinStudio/themes/$THEME_ID"
+mkdir -p "$THEME_DEST"
+cp "$THEME_SOURCE/theme.json" "$THEME_SOURCE/background.jpg" "$THEME_DEST/"
+~/.codex/codex-dream-skin-studio/scripts/switch-theme-macos.sh --id "$THEME_ID"
+~/.codex/codex-dream-skin-studio/scripts/start-dream-skin-macos.sh
+
+复制即用（Windows PowerShell，在本仓库根目录运行）：
+$ThemeRepo = (Get-Location).Path
+$ThemeSource = Join-Path $ThemeRepo '主题资源'
+if (-not (Test-Path -LiteralPath (Join-Path $ThemeSource 'theme.json')) -or -not (Test-Path -LiteralPath (Join-Path $ThemeSource 'background.jpg'))) { throw "Theme resources not found. Run this block from the Codex-Hypergryph-Theme repo root, or set `$ThemeRepo to that absolute path." }
+$Upstream = Join-Path $env:USERPROFILE 'Codex-Dream-Skin'
+if (Test-Path -LiteralPath (Join-Path $Upstream '.git')) { git -C $Upstream pull --ff-only } else { git clone https://github.com/Fei-Away/Codex-Dream-Skin.git $Upstream }
+Set-Location (Join-Path $Upstream 'windows')
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-dream-skin.ps1
+$ThemeId = 'preset-endfield-frontier'
+$ThemeDest = Join-Path $env:LOCALAPPDATA "CodexDreamSkin\themes\$ThemeId"
+New-Item -ItemType Directory -Force -Path $ThemeDest | Out-Null
+Copy-Item -LiteralPath (Join-Path $ThemeSource 'theme.json'), (Join-Path $ThemeSource 'background.jpg') -Destination $ThemeDest -Force
+. .\scripts\common-windows.ps1
+. .\scripts\theme-windows.ps1
+Use-DreamSkinSavedTheme -ThemeDirectory $ThemeDest | Out-Null
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-dream-skin.ps1 -PromptRestart
 
 非官方社区主题。项目名、预览内容均已脱敏。

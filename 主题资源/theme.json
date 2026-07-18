@@ -11,10 +11,13 @@
   "image": "background.jpg",
   "appearance": "dark",
   "art": {
-    "focusX": 0.74,
-    "focusY": 0.44,
+    "focusX": 0.62,
+    "focusY": 0.46,
     "safeArea": "left",
     "taskMode": "ambient"
+  },
+  "palette": {
+    "accent": "#F3C548"
   },
   "colors": {
     "background": "#0B0D0E",

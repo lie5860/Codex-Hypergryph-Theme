@@ -1,49 +1,94 @@
 # Codex Hypergryph Theme
 
-非官方 Codex Desktop 工业科幻主题，支持 macOS 与 Windows。视觉灵感来自鹰角网络《明日方舟》与《明日方舟：终末地》的边境工程美术语言。
+非官方 Codex Desktop 工业科幻主题资源包。视觉灵感来自鹰角网络《明日方舟》与《明日方舟：终末地》的边境工程美术语言。
+
+本仓库不再分发安装脚本、启动脚本、注入器或 vendored runtime。脚本、安装、启动、恢复和校验都以主仓库 [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin) 为准；本仓只提供可导入/可替换的主题资源。
 
 <p align="center">
   <img src="./docs/images/preview-desktop.png" alt="Codex Hypergryph Theme 桌面布局预览" width="100%">
   <br>
-  <sub>当前主题 CSS 与布局的脱敏预览；项目名均为虚构占位。</sub>
+  <sub>脱敏预览；项目名均为虚构占位。</sub>
 </p>
 
-## 最少安装步骤
+## 资源
 
-先完全退出 Codex，再下载并解压本仓库。
+- `主题资源/background.jpg`：原创工业科幻背景图。
+- `主题资源/theme.json`：主题元数据，包含名称、文案、外观、构图参数和 accent 色。
+
+本主题资源不新增、不隐藏 Codex 新建任务页的原生建议按钮。新版 Codex 或不同账号状态下可能不显示 suggestion cards；这种情况下主题只会渲染背景、标题区域和输入框外观。
+
+## 使用方式
+
+1. 先按主仓库文档安装并运行 Codex Dream Skin。
+2. 将本仓库的 `主题资源` 目录作为一个 saved theme/preset 目录使用，目录内只需要 `theme.json` 与 `background.jpg`。
+   - macOS 已安装主题库：`~/Library/Application Support/CodexDreamSkinStudio/themes/preset-endfield-frontier/`
+   - Windows 已安装主题库：`%LOCALAPPDATA%\CodexDreamSkin\themes\preset-endfield-frontier\`
+3. 继续使用主仓库自带命令或菜单切换、启动、验证和恢复主题；例如 macOS 可用主仓库的 `switch-theme-macos.sh --id preset-endfield-frontier`。
+
+## 复制即用
+
+下面命令默认你已经在本仓库根目录中运行，也就是当前目录下能看到 `主题资源`。脚本全部来自主仓库；本仓只把 `theme.json` 与 `background.jpg` 放进主仓库支持的主题库。
 
 ### macOS
 
-双击 `安装终末地主题-macOS.command`。
+```bash
+THEME_SOURCE="$(pwd)/主题资源"
+UPSTREAM="$HOME/Codex-Dream-Skin"
+
+if [ -d "$UPSTREAM/.git" ]; then
+  git -C "$UPSTREAM" pull --ff-only
+else
+  git clone https://github.com/Fei-Away/Codex-Dream-Skin.git "$UPSTREAM"
+fi
+
+cd "$UPSTREAM/macos"
+./scripts/install-dream-skin-macos.sh --no-launch
+
+THEME_ID="preset-endfield-frontier"
+THEME_DEST="$HOME/Library/Application Support/CodexDreamSkinStudio/themes/$THEME_ID"
+mkdir -p "$THEME_DEST"
+cp "$THEME_SOURCE/theme.json" "$THEME_SOURCE/background.jpg" "$THEME_DEST/"
+
+~/.codex/codex-dream-skin-studio/scripts/switch-theme-macos.sh --id "$THEME_ID"
+~/.codex/codex-dream-skin-studio/scripts/start-dream-skin-macos.sh
+```
 
 ### Windows
 
-安装 Node.js 22 或更高版本，然后双击 `安装终末地主题-Windows.cmd`。脚本会自动识别 PATH、fnm、nvm-windows、Volta 与常见安装目录中的可用版本，不要求当前终端默认的 `node` 恰好是 22。
+在 PowerShell 中运行。`$ThemeRepo` 必须指向本仓库根目录，也就是里面能看到 `主题资源` 的目录：
 
-如果启动失败，双击 `检查终末地主题环境-Windows.cmd` 可执行只读检查，验证 PowerShell、Node.js、Codex Store 安装、主题资源与注入器。Windows 版会使用 `%LOCALAPPDATA%\CodexDreamSkin\codex-profile` 作为持久化主题配置目录，以兼容 Chromium 136 之后的远程调试安全限制；官方 Codex 配置目录不会被改作调试配置，首次进入主题配置时可能需要重新登录。
+```powershell
+$ThemeRepo = (Get-Location).Path
+$ThemeSource = Join-Path $ThemeRepo '主题资源'
+if (-not (Test-Path -LiteralPath (Join-Path $ThemeSource 'theme.json')) -or
+    -not (Test-Path -LiteralPath (Join-Path $ThemeSource 'background.jpg'))) {
+  throw "Theme resources not found. Run this block from the Codex-Hypergryph-Theme repo root, or set `$ThemeRepo to that absolute path."
+}
 
-主题运行期间会保留一个可见的终端窗口，用于承载持续注入进程。请勿直接关闭该窗口；需要结束主题时应双击 `停用主题并恢复官方外观-Windows.cmd`。原因、企业环境使用方式与无窗口模式边界见 [`docs/windows-terminal-window.md`](./docs/windows-terminal-window.md)。
+$Upstream = Join-Path $env:USERPROFILE 'Codex-Dream-Skin'
 
-以后重新启用或停用主题，双击同目录中对应的“启动”或“停用主题并恢复官方外观”文件即可。
+if (Test-Path -LiteralPath (Join-Path $Upstream '.git')) {
+  git -C $Upstream pull --ff-only
+} else {
+  git clone https://github.com/Fei-Away/Codex-Dream-Skin.git $Upstream
+}
 
-## 特性
+Set-Location (Join-Path $Upstream 'windows')
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-dream-skin.ps1
 
-- 四张首页操作卡始终保持 2 × 2，图标已隐藏并改用 `01–04` 编号
-- 已验证 `480 × 600` 至 `2560 × 1440`，兼容侧栏展开、收起和矮窗口
-- macOS / Windows 使用同一套背景、颜色和布局
-- 不修改 Codex 官方安装包，不在桌面或开始菜单创建文件
-- Windows 主题会话使用独立、持久化的本机配置目录，不覆盖官方 Codex 浏览器配置
-- 恢复只撤销主题与本机调试会话，不删除任务、账号、插件或项目
+$ThemeId = 'preset-endfield-frontier'
+$ThemeDest = Join-Path $env:LOCALAPPDATA "CodexDreamSkin\themes\$ThemeId"
+New-Item -ItemType Directory -Force -Path $ThemeDest | Out-Null
+Copy-Item -LiteralPath (Join-Path $ThemeSource 'theme.json'), (Join-Path $ThemeSource 'background.jpg') -Destination $ThemeDest -Force
 
-## Windows 依赖结构
+. .\scripts\common-windows.ps1
+. .\scripts\theme-windows.ps1
+Use-DreamSkinSavedTheme -ThemeDirectory $ThemeDest | Out-Null
 
-Windows 版直接依赖 [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin) 的安装、启动、恢复、配置事务与 CDP 注入引擎，不再维护一份混合了本项目改动的运行时分叉：
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-dream-skin.ps1 -PromptRestart
+```
 
-- `vendor/Codex-Dream-Skin` 固定上游提交 `a1c48b3`，保存引擎脚本、测试和许可证
-- `.runtime-windows/assets` 只保存终末地 CSS、renderer、配置与原创背景
-- `.runtime-windows/scripts` 只负责 Node.js 探测、临时组装资源包和调用上游入口
-
-安装时会临时组装“固定上游引擎 + 终末地资源”，再由上游安装事务复制到 `%LOCALAPPDATA%\CodexDreamSkin\engine`。发布包不依赖 Git，也不需要在安装时联网。出于企业终端安全要求，vendored 上游移除了 3 处隐藏窗口启动参数；完整差异见 [`vendor/Codex-Dream-Skin/PATCHES.md`](./vendor/Codex-Dream-Skin/PATCHES.md)。维护与升级说明见 [`docs/windows-architecture.md`](./docs/windows-architecture.md)，终端窗口说明见 [`docs/windows-terminal-window.md`](./docs/windows-terminal-window.md)。
+如果主仓库后续更新了主题 schema，以主仓库文档为准，只调整 `theme.json` 和图片资源，不在本仓维护脚本分支。
 
 <details>
 <summary>最小窗口预览</summary>
@@ -54,12 +99,10 @@ Windows 版直接依赖 [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/
 
 </details>
 
-## 来源与声明
-
-主题运行框架依赖 [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin) 的 MIT 许可代码；上游许可证与声明保留在 [`vendor/Codex-Dream-Skin`](./vendor/Codex-Dream-Skin)。
+## 声明
 
 本项目与 OpenAI、鹰角网络均无隶属、授权或背书关系。仓库未包含官方游戏 CG、角色立绘或商标图形；背景为本项目生成的原创工业科幻画面。详细说明见 [NOTICE.md](./NOTICE.md) 与 [ASSET-PROVENANCE.md](./ASSET-PROVENANCE.md)。
 
 ## License
 
-代码采用 [MIT License](./LICENSE)。原创背景与脱敏预览采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。
+原创背景与脱敏预览采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。
