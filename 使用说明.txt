@@ -4,13 +4,14 @@ Codex Hypergryph Theme v1.0
 
 使用方式：
 1. 按主仓库 Fei-Away/Codex-Dream-Skin 的说明安装并运行。
-2. 将“主题资源”目录作为一个 saved theme/preset 目录使用；目录内只需要 theme.json 与 background.jpg。
+2. 将“主题资源”目录作为一个 saved theme/preset 目录使用；当前版本至少需要 theme.json 与其引用的 background-v2.jpg。
    macOS：~/Library/Application Support/CodexDreamSkinStudio/themes/preset-endfield-frontier/
    Windows：%LOCALAPPDATA%\CodexDreamSkin\themes\preset-endfield-frontier\
 3. 后续启动、切换、验证、恢复都使用主仓库自带命令或菜单。
 
 主题资源：
-- 主题资源/background.jpg
+- 主题资源/background-v2.jpg（当前主题使用）
+- 主题资源/background.jpg（上一版，回退与构图对照）
 - 主题资源/theme.json
 
 说明：本主题资源不新增、不隐藏 Codex 新建任务页的原生建议按钮。新版 Codex 或不同账号状态下可能不显示 suggestion cards；这种情况下主题只会渲染背景、标题区域和输入框外观。
@@ -24,14 +25,14 @@ cd "$UPSTREAM/macos"
 THEME_ID="preset-endfield-frontier"
 THEME_DEST="$HOME/Library/Application Support/CodexDreamSkinStudio/themes/$THEME_ID"
 mkdir -p "$THEME_DEST"
-cp "$THEME_SOURCE/theme.json" "$THEME_SOURCE/background.jpg" "$THEME_DEST/"
+cp "$THEME_SOURCE/theme.json" "$THEME_SOURCE/background-v2.jpg" "$THEME_DEST/"
 ~/.codex/codex-dream-skin-studio/scripts/switch-theme-macos.sh --id "$THEME_ID"
 ~/.codex/codex-dream-skin-studio/scripts/start-dream-skin-macos.sh
 
 复制即用（Windows PowerShell，在本仓库根目录运行）：
 $ThemeRepo = (Get-Location).Path
 $ThemeSource = Join-Path $ThemeRepo '主题资源'
-if (-not (Test-Path -LiteralPath (Join-Path $ThemeSource 'theme.json')) -or -not (Test-Path -LiteralPath (Join-Path $ThemeSource 'background.jpg'))) { throw "Theme resources not found. Run this block from the Codex-Hypergryph-Theme repo root, or set `$ThemeRepo to that absolute path." }
+if (-not (Test-Path -LiteralPath (Join-Path $ThemeSource 'theme.json')) -or -not (Test-Path -LiteralPath (Join-Path $ThemeSource 'background-v2.jpg'))) { throw "Theme resources not found. Run this block from the Codex-Hypergryph-Theme repo root, or set `$ThemeRepo to that absolute path." }
 $Upstream = Join-Path $env:USERPROFILE 'Codex-Dream-Skin'
 if (Test-Path -LiteralPath (Join-Path $Upstream '.git')) { git -C $Upstream pull --ff-only } else { git clone https://github.com/Fei-Away/Codex-Dream-Skin.git $Upstream }
 Set-Location (Join-Path $Upstream 'windows')
@@ -39,7 +40,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-dream-
 $ThemeId = 'preset-endfield-frontier'
 $ThemeDest = Join-Path $env:LOCALAPPDATA "CodexDreamSkin\themes\$ThemeId"
 New-Item -ItemType Directory -Force -Path $ThemeDest | Out-Null
-Copy-Item -LiteralPath (Join-Path $ThemeSource 'theme.json'), (Join-Path $ThemeSource 'background.jpg') -Destination $ThemeDest -Force
+Copy-Item -LiteralPath (Join-Path $ThemeSource 'theme.json'), (Join-Path $ThemeSource 'background-v2.jpg') -Destination $ThemeDest -Force
 . .\scripts\common-windows.ps1
 . .\scripts\theme-windows.ps1
 Use-DreamSkinSavedTheme -ThemeDirectory $ThemeDest | Out-Null

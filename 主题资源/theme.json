@@ -8,12 +8,12 @@
   "projectLabel": "ENDFIELD // 选择工作区",
   "statusText": "INDUSTRIAL DEPLOYMENT // READY",
   "quote": "BUILD THE FRONTIER // 01",
-  "image": "background.jpg",
+  "image": "background-v2.jpg",
   "appearance": "dark",
   "art": {
-    "focusX": 0.62,
+    "focusX": 0.72,
     "focusY": 0.46,
-    "safeArea": "left",
+    "safeArea": "none",
     "taskMode": "ambient"
   },
   "palette": {

@@ -7,12 +7,13 @@
 <p align="center">
   <img src="./docs/images/preview-desktop.png" alt="Codex Hypergryph Theme 桌面布局预览" width="100%">
   <br>
-  <sub>脱敏预览；项目名均为虚构占位。</sub>
+  <sub>Codex 26.715 / Dream Skin 1.2.0 布局参考；项目名均为虚构占位，后续 Codex 版本的原生控件可能变化。</sub>
 </p>
 
 ## 资源
 
-- `主题资源/background.jpg`：原创工业科幻背景图。
+- `主题资源/background-v2.jpg`：当前主题使用的原创工业科幻背景图；主塔位于右侧，左侧保留 UI 安全区。
+- `主题资源/background.jpg`：上一版背景图，保留用于回退与构图对照。
 - `主题资源/theme.json`：主题元数据，包含名称、文案、外观、构图参数和 accent 色。
 
 本主题资源不新增、不隐藏 Codex 新建任务页的原生建议按钮。新版 Codex 或不同账号状态下可能不显示 suggestion cards；这种情况下主题只会渲染背景、标题区域和输入框外观。
@@ -20,14 +21,14 @@
 ## 使用方式
 
 1. 先按主仓库文档安装并运行 Codex Dream Skin。
-2. 将本仓库的 `主题资源` 目录作为一个 saved theme/preset 目录使用，目录内只需要 `theme.json` 与 `background.jpg`。
+2. 将本仓库的 `主题资源` 目录作为一个 saved theme/preset 目录使用；当前版本至少需要 `theme.json` 与其引用的 `background-v2.jpg`。
    - macOS 已安装主题库：`~/Library/Application Support/CodexDreamSkinStudio/themes/preset-endfield-frontier/`
    - Windows 已安装主题库：`%LOCALAPPDATA%\CodexDreamSkin\themes\preset-endfield-frontier\`
 3. 继续使用主仓库自带命令或菜单切换、启动、验证和恢复主题；例如 macOS 可用主仓库的 `switch-theme-macos.sh --id preset-endfield-frontier`。
 
 ## 复制即用
 
-下面命令默认你已经在本仓库根目录中运行，也就是当前目录下能看到 `主题资源`。脚本全部来自主仓库；本仓只把 `theme.json` 与 `background.jpg` 放进主仓库支持的主题库。
+下面命令默认你已经在本仓库根目录中运行，也就是当前目录下能看到 `主题资源`。脚本全部来自主仓库；本仓只把 `theme.json` 与当前背景图放进主仓库支持的主题库。
 
 ### macOS
 
@@ -47,7 +48,7 @@ cd "$UPSTREAM/macos"
 THEME_ID="preset-endfield-frontier"
 THEME_DEST="$HOME/Library/Application Support/CodexDreamSkinStudio/themes/$THEME_ID"
 mkdir -p "$THEME_DEST"
-cp "$THEME_SOURCE/theme.json" "$THEME_SOURCE/background.jpg" "$THEME_DEST/"
+cp "$THEME_SOURCE/theme.json" "$THEME_SOURCE/background-v2.jpg" "$THEME_DEST/"
 
 ~/.codex/codex-dream-skin-studio/scripts/switch-theme-macos.sh --id "$THEME_ID"
 ~/.codex/codex-dream-skin-studio/scripts/start-dream-skin-macos.sh
@@ -61,7 +62,7 @@ cp "$THEME_SOURCE/theme.json" "$THEME_SOURCE/background.jpg" "$THEME_DEST/"
 $ThemeRepo = (Get-Location).Path
 $ThemeSource = Join-Path $ThemeRepo '主题资源'
 if (-not (Test-Path -LiteralPath (Join-Path $ThemeSource 'theme.json')) -or
-    -not (Test-Path -LiteralPath (Join-Path $ThemeSource 'background.jpg'))) {
+    -not (Test-Path -LiteralPath (Join-Path $ThemeSource 'background-v2.jpg'))) {
   throw "Theme resources not found. Run this block from the Codex-Hypergryph-Theme repo root, or set `$ThemeRepo to that absolute path."
 }
 
@@ -79,7 +80,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-dream-
 $ThemeId = 'preset-endfield-frontier'
 $ThemeDest = Join-Path $env:LOCALAPPDATA "CodexDreamSkin\themes\$ThemeId"
 New-Item -ItemType Directory -Force -Path $ThemeDest | Out-Null
-Copy-Item -LiteralPath (Join-Path $ThemeSource 'theme.json'), (Join-Path $ThemeSource 'background.jpg') -Destination $ThemeDest -Force
+Copy-Item -LiteralPath (Join-Path $ThemeSource 'theme.json'), (Join-Path $ThemeSource 'background-v2.jpg') -Destination $ThemeDest -Force
 
 . .\scripts\common-windows.ps1
 . .\scripts\theme-windows.ps1
